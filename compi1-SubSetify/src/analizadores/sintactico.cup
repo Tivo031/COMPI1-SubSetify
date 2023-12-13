@@ -1,0 +1,103 @@
+// ------------  Paquete e importaciones ------------
+package analizadores;
+
+import java_cup.runtime.*;
+
+
+//------> Codigo para el parser
+//------> Declaracion de variables, funciones y funciones de error
+
+parser code 
+{:
+    public static String resultado = ""; 
+
+    public void syntax_error(Symbol s)
+    {
+            System.err.println("Error Sintactico: "+ s.value + " - Fila: " + s.right + " - Columna: " + s.left + ". Recuperado" );
+    }
+
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    {
+            System.err.println("Error Sintactico: "+ s.value + " - Fila: " + s.right + " - Columna: " + s.left + ". Sin recuperacion." );
+    }
+
+:}
+
+
+//------> Codigo para las acciones gramaticales (no tocar)
+action code
+{:  :}
+
+
+//------> Declaración de terminales
+
+terminal llaveA, llaveC, parentesisA, parentesisC,dospuntos,puntocoma;
+terminal punto, asterisco, mas, interrogacion, disyuncion;
+terminal coma, virgulilla,guion;
+terminal String id, numero, signo, especial;
+terminal String conj, flecha, cadena;
+
+//------> Declaraci�n de no terminales
+non terminal INICIO;
+non terminal LISTADECLARACIONES;
+non terminal DECLARACION;
+non terminal TIPOCONJ;
+non terminal LISTAA;
+non terminal A;
+non terminal LISTAEXP;
+non terminal EXP;
+
+
+/*
+// ------> Precedencia
+precedence left MAS;
+precedence left POR;
+*/
+
+//------> Definir Simbolo Inicial
+start with INICIO; 
+
+
+// ------------>  Producciones  <------------
+
+INICIO ::= llaveA LISTADECLARACIONES llaveC
+       ;
+
+LISTADECLARACIONES::= LISTADECLARACIONES DECLARACION
+                     |DECLARACION
+                     ;
+
+DECLARACION::= conj dospuntos id flecha A TIPOCONJ puntocoma 
+                | id flecha LISTAEXP puntocoma 
+                | error puntocoma {:System.out.println("Error!!!!"); :}
+                ;
+
+TIPOCONJ::= virgulilla A
+          |guion A
+          |coma LISTAA
+          ;
+
+LISTAA::= LISTAA coma A
+        |A
+        ;
+
+A::= id
+   | numero
+   | signo
+   | especial
+   ;
+
+LISTAEXP::= LISTAEXP EXP 
+          | EXP
+          ;
+
+EXP ::= punto EXP EXP
+      | disyuncion EXP EXP
+      | asterisco EXP
+      | mas EXP 
+      | interrogacion EXP
+      | parentesisA id parentesisC 
+      | cadena
+      | especial 
+      | signo
+      ;
